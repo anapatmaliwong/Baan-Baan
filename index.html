@@ -627,8 +627,22 @@ document.querySelectorAll('.rv').forEach(el => io.observe(el));
 
 /* ─── MOUSE SYSTEMS (desktop only) ─── */
 (function(){
-  const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  if (isTouch) { document.body.classList.add('is-touch'); return; }
+  /* ตรวจสอบ touch device แบบครอบคลุม:
+     1. matchMedia pointer:coarse — smartphone / tablet ทั่วไป
+     2. maxTouchPoints > 1 — iOS, Android, Windows Touch
+     3. ontouchstart — browser รุ่นเก่า */
+  const isTouch = (
+    window.matchMedia('(hover: none) and (pointer: coarse)').matches ||
+    navigator.maxTouchPoints > 1 ||
+    'ontouchstart' in window
+  );
+  if (isTouch) {
+    document.body.classList.add('is-touch');
+    /* ซ่อน water canvas บน touch device ด้วย — ไม่งั้น pointer-events อาจขัด scroll */
+    const wc = document.getElementById('water-canvas');
+    if (wc) wc.style.display = 'none';
+    return;
+  }
   document.body.classList.add('has-cursor');
 
   /* === 1. CURSOR === */
